@@ -6,4 +6,5 @@
 - [x] Test axios request
 - [x] create game
 - [x] load games
-- [ ] preview grid
+- [x] preview grid
+- [x] reveal Cell 

@@ -9,11 +9,10 @@
 <button @click="createLoadGame">Create N Load Game</button>
 <pre>{{game}}</pre>
 
-<div class="d-flex">
-  some
-  <div v-for="(row,key) in grid" :key="key">
-    <div class="cell" v-for="cell in row" :key="cell.id">
-      {{cell.x}},{{cell.y}},<b>{{cell.mine}}</b>
+<div class="d-flex flex-column">
+  <div class="d-flex" v-for="(row,key) in grid" :key="key">
+    <div  @click="reaveal(cell)" class="cell" :class="{revealed : cell.revealed}" v-for="cell in row" :key="cell.id">
+      <b v-if="cell.mine">X</b> {{cell.revealed}}
     </div>
   </div>
 </div>
@@ -44,10 +43,16 @@ export default {
     this.loadGames();
   },
   methods:{
+    reaveal(cell){
+      this.$axios.get('http://127.0.0.1:8000/api/game/reveal/'+cell.id).then( ({data}) => {
+        this.grid = data;
+      })
+
+    },
     loadGames(){
       this.$axios.get('http://127.0.0.1:8000/api/games').then( ({data}) => {
-      this.games = data;
-    })
+        this.games = data;
+      })
     },
     loadGame(game){
       this.$axios.get('http://127.0.0.1:8000/api/game/'+game.id).then( ({data}) => {
@@ -57,7 +62,7 @@ export default {
     },
     createGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create',{
-        mines:5,
+        mines:50,
         cols:10,
         rows:10
       }).then( ({data}) => {
@@ -67,7 +72,7 @@ export default {
     },
     createLoadGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create-n-load',{
-        mines:5,
+        mines:50,
         cols:10,
         rows:10
       }).then( ({data}) => {
@@ -81,6 +86,9 @@ export default {
 </script>
 
 <style>
+.revealed{
+  background: #35495e;
+}
 .cell{
   border: 1px solid #000;
   width: 50px;
