@@ -34,6 +34,12 @@ import Logo from '~/components/Logo.vue'
 export default {
   components: {
     Logo
+  },
+  mounted(){
+    this.$axios.get('http://127.0.0.1:8000/api/test')
+    this.$axios.post('http://127.0.0.1:8000/api/test')
+    this.$axios.put('http://127.0.0.1:8000/api/test')
+    this.$axios.delete('http://127.0.0.1:8000/api/test')
   }
 }
 </script>
