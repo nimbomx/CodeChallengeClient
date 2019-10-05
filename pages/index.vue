@@ -1,28 +1,53 @@
 <template>
   <div class="container">
     <div>
-      <div>
+      <div v-if="!playing">
         <button @click="loadGame(game)" v-for="game in games" :key="game.id">Game:  {{ game.id }} </button @click="loadGame(game)">
       </div>
 <hr>
-<button @click="createGame">Create Game</button>
-<button @click="createLoadGame">Create N Load Game</button>
-<pre>{{game}}</pre>
+<!--<button @click="createGame">Create Game</button>-->
+<div v-if="!playing" class="d-flex flex-column">
+  <div>
+    <label>Rows</label>
+    <input type="text" v-model="rows" placeholder="rows">
+  </div>
+  <div>
+    <label>Cols</label>
+    <input type="text" v-model="cols" placeholder="cols">
+  </div>
+  <div>
+    <label>Mines</label>
+    <input type="text" v-model="mines" placeholder="mines">
+  </div>
+  <button  @click="createLoadGame">Create Game</button>
+</div>
+<button v-if="playing" @click="closeGame">Close</button>
+
+
+<div v-if="playing" class="d-flex">
+<div v-if="false">
+  <pre >{{game}}</pre>
+</div>
+<div>
 
 <h1 v-if="gameover">GAME OVER</h1>
+<h1 v-if="win">YOU WIN</h1>
+<h4 v-if="game.time">{{game.time}} seconds</h4>
 
-<div class="d-flex flex-column">
+<div class="d-flex flex-column" >
   <div class="d-flex" v-for="(row,key) in grid" :key="key">
-    <div  class="cell" :class="{revealed : col.revealed}" v-for="(col,key) in row" :key="key"
+    <div  class="cell" :class="{revealed : col.revealed, boom : col.revealed && col.mine}" v-for="(col,key) in row" :key="key"
       @contextmenu.prevent="flag(col)"
       @click="reaveal(col)"
     >
 
-      <b v-if="col.mine">X</b> {{col.around}} <small>{{col.mark}}</small>
+      <b v-if="col.mine && col.revealed">X</b> <span v-if="col.around">{{col.around}}</span> <small>{{col.mark}}</small>
     </div>
   </div>
 </div>
 
+</div>
+</div>
     </div>
   </div>
 </template>
@@ -36,10 +61,15 @@ export default {
   },
   data(){
     return {
+      cols:10,
+      rows:10,
+      mines:10,
       games:[],
       game:null,
       grid:[],
-      gameover:false
+      gameover:false,
+      win:false,
+      playing:false
     }
   },
   mounted(){
@@ -50,17 +80,25 @@ export default {
     this.loadGames();
   },
   methods:{
+    closeGame(){
+      //stop timer
+      this.playing = false
+      this.$axios.get('http://127.0.0.1:8000/api/game/close/'+this.game.id).then( ({data}) => {
+
+      })
+    },
     flag(cell) {
-      if(this.gameover) return
+      if(this.gameover || this.win) return
         this.$axios.get('http://127.0.0.1:8000/api/game/flag/'+cell.id).then( ({data}) => {
         this.grid[data.x][data.y] = data;
       })
      },
     reaveal(cell){
-      if(this.gameover) return
+      if(this.gameover || this.win) return
       this.$axios.get('http://127.0.0.1:8000/api/game/reveal/'+cell.id).then( ({data}) => {
         this.grid = data.grid;
         if(data.status == 'boom') this.gameover = true;
+        if(data.iwin) this.win = true;
       })
 
     },
@@ -74,13 +112,15 @@ export default {
       this.game = data.game;
       this.grid = data.grid;
       this.gameover = data.game.result === 'loose'
+      this.win = data.game.result === 'win'
+      this.playing = true;
     })
     },
     createGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create',{
-        mines:20,
-        cols:10,
-        rows:10
+        mines:this.mines,
+        cols:this.cols,
+        rows:this.rows
       }).then( ({data}) => {
         this.loadGames();
        this.game = data
@@ -88,13 +128,15 @@ export default {
     },
     createLoadGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create-n-load',{
-        mines:20,
-        cols:10,
-        rows:10
+        mines:this.mines,
+        cols:this.cols,
+        rows:this.rows
       }).then( ({data}) => {
         this.loadGames();
         this.game = data.game;
         this.grid = data.grid;
+        this.gameover = false
+        this.playing = true;
       })
     }
   }
@@ -104,6 +146,9 @@ export default {
 <style>
 .revealed{
   background: #acafb3;
+}
+.boom{
+  background: red;
 }
 .cell{
   border: 1px solid #000;

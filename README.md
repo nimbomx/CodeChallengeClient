@@ -10,9 +10,9 @@
 - [x] reveal Cell 
 ---
 - [x] show numbers 
-- [ ] hide zeros
+- [x] hide zeros
 - [x] add marks
 - [x] game over
-- [ ] hide mines 
-- [ ] a little bit of style 
+- [x] hide mines 
+- [x] a little bit of style 
 
