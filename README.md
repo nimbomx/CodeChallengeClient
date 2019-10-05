@@ -8,3 +8,10 @@
 - [x] load games
 - [x] preview grid
 - [x] reveal Cell 
+---
+- [x] show numbers 
+- [ ] hide zeros
+- [ ] add marks
+- [ ] hide mines 
+- [ ] a little bit of style 
+

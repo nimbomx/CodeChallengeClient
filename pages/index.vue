@@ -11,8 +11,11 @@
 
 <div class="d-flex flex-column">
   <div class="d-flex" v-for="(row,key) in grid" :key="key">
-    <div  @click="reaveal(cell)" class="cell" :class="{revealed : cell.revealed}" v-for="cell in row" :key="cell.id">
-      <b v-if="cell.mine">X</b> {{cell.revealed}}
+    <div  class="cell" :class="{revealed : col.revealed}" v-for="(col,key) in row" :key="key"
+      @click="reaveal(col)"
+    >
+
+      <b v-if="col.mine">X</b> {{col.around}}
     </div>
   </div>
 </div>
@@ -45,7 +48,8 @@ export default {
   methods:{
     reaveal(cell){
       this.$axios.get('http://127.0.0.1:8000/api/game/reveal/'+cell.id).then( ({data}) => {
-        this.grid = data;
+        this.grid = data.grid;
+        console.log(data.status);
       })
 
     },
@@ -62,7 +66,7 @@ export default {
     },
     createGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create',{
-        mines:50,
+        mines:20,
         cols:10,
         rows:10
       }).then( ({data}) => {
@@ -72,7 +76,7 @@ export default {
     },
     createLoadGame(){
       this.$axios.post('http://127.0.0.1:8000/api/game/create-n-load',{
-        mines:50,
+        mines:20,
         cols:10,
         rows:10
       }).then( ({data}) => {
@@ -87,7 +91,7 @@ export default {
 
 <style>
 .revealed{
-  background: #35495e;
+  background: #acafb3;
 }
 .cell{
   border: 1px solid #000;
