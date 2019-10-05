@@ -11,7 +11,8 @@
 ---
 - [x] show numbers 
 - [ ] hide zeros
-- [ ] add marks
+- [x] add marks
+- [x] game over
 - [ ] hide mines 
 - [ ] a little bit of style 
 

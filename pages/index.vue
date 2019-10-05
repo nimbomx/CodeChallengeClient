@@ -9,13 +9,16 @@
 <button @click="createLoadGame">Create N Load Game</button>
 <pre>{{game}}</pre>
 
+<h1 v-if="gameover">GAME OVER</h1>
+
 <div class="d-flex flex-column">
   <div class="d-flex" v-for="(row,key) in grid" :key="key">
     <div  class="cell" :class="{revealed : col.revealed}" v-for="(col,key) in row" :key="key"
+      @contextmenu.prevent="flag(col)"
       @click="reaveal(col)"
     >
 
-      <b v-if="col.mine">X</b> {{col.around}}
+      <b v-if="col.mine">X</b> {{col.around}} <small>{{col.mark}}</small>
     </div>
   </div>
 </div>
@@ -35,7 +38,8 @@ export default {
     return {
       games:[],
       game:null,
-      grid:[]
+      grid:[],
+      gameover:false
     }
   },
   mounted(){
@@ -46,10 +50,17 @@ export default {
     this.loadGames();
   },
   methods:{
+    flag(cell) {
+      if(this.gameover) return
+        this.$axios.get('http://127.0.0.1:8000/api/game/flag/'+cell.id).then( ({data}) => {
+        this.grid[data.x][data.y] = data;
+      })
+     },
     reaveal(cell){
+      if(this.gameover) return
       this.$axios.get('http://127.0.0.1:8000/api/game/reveal/'+cell.id).then( ({data}) => {
         this.grid = data.grid;
-        console.log(data.status);
+        if(data.status == 'boom') this.gameover = true;
       })
 
     },
@@ -61,7 +72,8 @@ export default {
     loadGame(game){
       this.$axios.get('http://127.0.0.1:8000/api/game/'+game.id).then( ({data}) => {
       this.game = data.game;
-        this.grid = data.grid;
+      this.grid = data.grid;
+      this.gameover = data.game.result === 'loose'
     })
     },
     createGame(){
